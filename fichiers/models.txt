@@ -1,0 +1,128 @@
+les models:
+
+from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey
+from sqlalchemy.orm import relationship
+from database import Base
+
+# Admin model
+class Admin(Base):
+    __tablename__ = "Admins"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("Users.id"), unique=True)
+    
+    # Relationship
+    user = relationship("User", back_populates="admin")
+    user_requests = relationship("Add_User_Request", back_populates="user")
+
+
+from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey
+from sqlalchemy.orm import relationship
+from database import Base
+from .relations import User_Group
+from .tenants_model import Tenant
+# Group model
+class Group(Base):
+    __tablename__ = "Groups"
+    
+    id_group = Column(Integer, primary_key=True, index=True)
+    group_name = Column(String, nullable=False)
+    tenant_id = Column(Integer, ForeignKey("Tenants.id_tenant"), nullable=False)
+    
+    # Relationship
+    tenant = relationship(Tenant, back_populates="groups")
+    users = relationship(User_Group, back_populates="group")
+
+
+from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey
+from sqlalchemy.orm import relationship
+from database import Base
+# License model
+class License(Base):
+    __tablename__ = "Licenses"
+    
+    id_license = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("Tenants.id_tenant"), nullable=False)
+    license_count = Column(Integer, nullable=False)
+    purchase_date = Column(Date)
+    expiration_date = Column(Date)
+    is_active = Column(Boolean)
+    
+    # Relationship
+    tenant = relationship("Tenant", back_populates="licenses")
+
+from sqlalchemy import Column, Integer, ForeignKey, Date, String
+from sqlalchemy.orm import relationship
+from database import Base
+from .admins_model import Admin
+from .tenants_model import Tenant
+from .users_model import User
+
+# User_Group model
+class User_Group(Base):
+    __tablename__ = "User_Groups"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
+    group_id = Column(Integer, ForeignKey("Groups.id_group"), nullable=False)
+    
+    # Relationships
+    #user = relationship("User", back_populates="user_groups")
+ #   group = relationship("Group", back_populates="group_users")
+
+# Add_User_Request model
+class Add_User_Request(Base):
+    __tablename__ = "Add_User_Requests"
+    
+    id_request = Column(Integer, primary_key=True, index=True)
+    admin_id = Column(Integer, ForeignKey("Admins.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
+    tenant_id = Column(Integer, ForeignKey("Tenants.id_tenant"), nullable=False)
+    request_date = Column(Date)
+    status = Column(String)
+    
+    # Relationships
+    admin = relationship(Admin, back_populates="user_requests")
+    user = relationship(User, back_populates="user_requests")
+    tenant = relationship(Tenant, back_populates="user_requests")
+
+
+from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey
+from sqlalchemy.orm import relationship
+from database import Base
+# Tenant model
+class Tenant(Base):
+    __tablename__ = "Tenants"
+    
+    id_tenant = Column(Integer, primary_key=True, index=True)
+    tenant_name = Column(String, nullable=False)
+    admin_id = Column(Integer, ForeignKey("Admins.id"))
+    created_date = Column(Date)
+    
+    # Relationship
+    licenses = relationship("License", back_populates="tenant")
+    groups = relationship("Group", back_populates="tenant")
+    user_requests = relationship("Add_User_Request", back_populates="user")
+
+
+# file: models/user.py
+
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
+from database import Base
+from .relations import User_Group, Add_User_Request
+
+class User(Base):
+    __tablename__ = "Users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    uid_user = Column(String, unique=True, nullable=False)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    profile = Column(String)
+
+    # Relationships
+    groups = relationship(User_Group, back_populates="user")
+    user_requests = relationship(Add_User_Request, back_populates="user")
+ 

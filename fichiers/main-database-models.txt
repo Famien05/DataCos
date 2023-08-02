@@ -1,0 +1,206 @@
+voici mes fichiers main.py:
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from routers import users_routers, admins_routers, tenants_routers, groups_routers, licenses_routers
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Vous pouvez spécifier les origines spécifiques ici
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(users_routers.router, prefix="/users", tags=["users"])
+"""app.include_router(admins_routers.router, prefix="/admins", tags=["admins"])
+app.include_router(tenants_routers.router, prefix="/tenants", tags=["tenants"])
+app.include_router(groups_routers.router, prefix="/groups", tags=["groups"])
+app.include_router(licenses_routers.router, prefix="/licenses", tags=["licenses"])"""
+
+
+database.py:
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:0000@localhost:5432/projetDataiku"
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+certaines route de main sont en commentaire car on a pas encore ecrit ces routes.
+
+voici mes models:
+admin_entities:
+from typing import Optional
+from pydantic import BaseModel
+from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+class Admin(Base):
+    __tablename__ = "Admins"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
+
+class AdminBase(BaseModel):
+    user_id: int
+
+class AdminInDB(AdminBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class AdminPublic(AdminInDB):
+    pass
+
+
+groups_entities:
+from typing import Optional
+from pydantic import BaseModel
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+class Group(Base):
+    __tablename__ = "Groups"
+
+    id_group = Column(Integer, primary_key=True, index=True)
+    group_name = Column(String, nullable=False)
+    tenant_id = Column(Integer, ForeignKey("Tenants.id_tenant"), nullable=False)
+    description = Column(String)
+
+class GroupBase(BaseModel):
+    group_name: str
+    tenant_id: int
+    description: Optional[str] = None
+
+class GroupInDB(GroupBase):
+    id_group: int
+
+    class Config:
+        orm_mode = True
+
+class GroupPublic(GroupInDB):
+    pass
+
+
+licenses_entities:
+from typing import Optional
+from pydantic import BaseModel
+from sqlalchemy import Column, Integer, Date, Boolean, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from datetime import date
+
+Base = declarative_base()
+
+class License(Base):
+    __tablename__ = "Licenses"
+
+    id_license = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("Tenants.id_tenant"), nullable=False)
+    license_count = Column(Integer, nullable=False)
+    purchase_date = Column(Date)
+    expiration_date = Column(Date)
+    is_active = Column(Boolean, default=True)
+
+class LicenseBase(BaseModel):
+    tenant_id: int
+    license_count: int
+    purchase_date: Optional[date] = None
+    expiration_date: Optional[date] = None
+    is_active: Optional[bool] = True
+
+class LicenseInDB(LicenseBase):
+    id_license: int
+
+    class Config:
+        orm_mode = True
+
+class LicensePublic(LicenseInDB):
+    pass
+
+
+tenants_entities:
+from typing import Optional
+from pydantic import BaseModel
+from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from datetime import date
+
+Base = declarative_base()
+
+class Tenant(Base):
+    __tablename__ = "Tenants"
+
+    id_tenant = Column(Integer, primary_key=True, index=True)
+    tenant_name = Column(String, nullable=False)
+    admin_id = Column(Integer, ForeignKey("Admins.id"))
+    created_date = Column(Date)
+
+class TenantBase(BaseModel):
+    tenant_name: str
+    admin_id: Optional[int] = None
+
+class TenantInDB(TenantBase):
+    id_tenant: int
+    created_date: Optional[date] = None
+
+    class Config:
+        orm_mode = True
+
+class TenantPublic(TenantInDB):
+    pass
+
+
+users_entities:
+from typing import Optional
+from pydantic import BaseModel
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+class User(Base):
+    __tablename__ = "Users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    uid_user = Column(String, unique=True, nullable=False)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    profile = Column(String)
+
+class UserBase(BaseModel):
+    uid_user: str
+    first_name: str
+    last_name: str
+    email: str
+    profile: Optional[str] = None
+
+class UserInDB(UserBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class UserPublic(UserInDB):
+    pass

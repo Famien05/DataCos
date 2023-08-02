@@ -1,0 +1,169 @@
+aide moi a mettre en place mon frontend.
+bonjour, je voudrais que tu te mette dans la peau d'un chef de projet expérimenté et d'un developpeur expérimenté afin de maider à realiser un projet. je vais te fournir toute les infos que j'ai sur mon projet, je je voudrai que tu me fasse une synthèse de ce projet de sorte a ce que quiquonce le lise comprenne le projet dans sa globalité.
+dans le but de simplifier le processus d'ajout d'un user à un tenant, Charly et Keren nous ont contacté pour qu'on fasse un développement sur la marketplace avec un formulaire, une base de données, et une api.
+Lorsque l'admin fait une demande de souscription via la marketplace, l'api insert le user dans une base de données.
+AVANT
+Avant les Admins remplissaient un fichier Excel qu'ils envoyaient par mail à Keren. À la suite de cela, elle faisait des vérifications (de l'environnement, des licences,
+...) :
+• Environnement hors prod : l'équipe dataiku ajoute directement le user au tenant.
+• Environnement de prod : l'équipe dataiku verifie d'abord s'il y a des licences disponibles (un file Excel où il y a le nombre de licence acheté)
+On vérifie juste s'il y a encore des licences dispos sur le tenant) après quoi on l'ajoute ou non.
+On l'ajoute au fichier Excel. On vérifie s'il est dans le Excel grâce à l'uid. Il le trouve le profil se créer automatique la sortie sera le mail.
+Si non on le cherche sur who's who pour avoir ses infos et les ajouter manuellement.
+
+Le résultat voulu
+
+1. Les admins se connectent sur la marketplace, remplissent le formulaire avec les informations du user qu'ils souhaitent ajouter (pareil que le fichier Excel) et aussi les infos du tenant (liste déroulante) sur lequel ils souhaitent l'ajouter.
+2. Ils cliquent sur « Faire une demande d'ajout »
+3. L'Api envoie ces données dans la base de données PostgreSQL.
+1. **Authentification des administrateurs** : Les administrateurs doivent pouvoir se connecter à l'application pour soumettre des demandes d'ajout d'utilisateur.
+
+2. **Formulaire de demande d'ajout d'utilisateur** : Il doit permettre aux administrateurs de soumettre des demandes d'ajout d'utilisateurs en renseignant des informations sur l'utilisateur et le tenant.
+
+3. **Validation des demandes d'ajout d'utilisateur** : Les demandes d'ajout d'utilisateur doivent être validées avant d'être traitées. Par exemple, vérifier que l'utilisateur n'est pas déjà ajouté au tenant, que le tenant dispose de licences disponibles, etc.
+
+4. **Insertion d'utilisateurs dans la base de données** : Une fois validées, les demandes d'ajout d'utilisateur doivent être traitées en insérant les informations de l'utilisateur dans la base de données.
+
+5. **Gestion des licences des tenants** : Il doit y avoir une logique pour vérifier le nombre de licences disponibles pour un tenant avant d'ajouter un nouvel utilisateur.
+
+6. **Gestion des tenants** : Les administrateurs doivent être capables de créer de nouveaux tenants et/ou de se joindre à des tenants existants.
+
+7. **Notifications par e-mail** : Les administrateurs et les utilisateurs doivent recevoir des notifications par e-mail lorsqu'une demande d'ajout d'utilisateur est traitée. De plus, un récapitulatif quotidien des ajouts d'utilisateurs doit être envoyé à l'équipe Dataiku.
+
+8. **Gestion des erreurs et des exceptions** : Toutes les erreurs potentielles (par exemple, plus de licences disponibles, utilisateur déjà existant, etc.) doivent être gérées de manière appropriée et les utilisateurs doivent être informés de manière claire et compréhensible.
+
+9. **Sécurité** : Toutes les données sensibles doivent être correctement protégées, et les connexions à l'application doivent être sécurisées.
+
+10. **Journalisation** : Les activités importantes de l'application doivent être enregistrées pour faciliter le débogage et la surveillance.
+
+Chacune de ces fonctionnalités est un projet en soi, et elles devraient être décomposées en tâches plus petites lors de la mise en œuvre. De plus, il est possible que certaines fonctionnalités supplémentaires ou spécifiques à votre organisation soient nécessaires, donc cette liste n'est pas exhaustive.
+
+
+Ensuite 
+
+
+
+
+Quand l'admin clique sur le bouton :
+-*
+Dev : ajouter directement le user au tenant
+Prod : vérifier s'il y a des licences disponibles à l'aide d'une requête
+• S'il n'y a plus de licences, afficher un message disant qu'il n'y a plus de licences disponibles.
+• S'il y a des licences, vérifier les infos du user et l'insérer directement a la base de données grâce à ses infos.
+Permettre aussi a des admin de créer des tenants ou de rejoindre des tenants 
+2 mails sont envoyés
+• 1 mail au user pour l'informer que la souscription est faite
+• 1 mail est envoyé à l'admin pour lui dire que la souscription est faite
+
+on va chercher a tout automatiser meme la demande d'ajout comme ça en fonction des critères à respecter, l'ajout se fera automatiquement.
+voici ma base de données:
+CREATE TABLE Users (
+    id SERIAL PRIMARY KEY,
+    uid_user VARCHAR(50) UNIQUE NOT NULL,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    profile VARCHAR(50)
+);
+
+CREATE TABLE Admins (
+    id SERIAL PRIMARY KEY,
+    user_id INT UNIQUE NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(id)
+);
+
+CREATE TABLE Tenants (
+    id_tenant SERIAL PRIMARY KEY,
+    tenant_name VARCHAR(50) NOT NULL,
+    admin_id INT,
+    created_date DATE,
+    FOREIGN KEY (admin_id) REFERENCES Admins(id)
+);
+
+CREATE TABLE Licenses (
+    id_license SERIAL PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    license_count INT NOT NULL,
+    purchase_date DATE,
+    expiration_date DATE,
+    is_active BOOLEAN,
+    FOREIGN KEY (tenant_id) REFERENCES Tenants(id_tenant)
+);
+
+CREATE TABLE Groups (
+    id_group SERIAL PRIMARY KEY,
+    group_name VARCHAR(50) NOT NULL,
+    tenant_id INT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES Tenants(id_tenant)
+);
+
+CREATE TABLE User_Groups (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    group_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (group_id) REFERENCES Groups(id_group)
+);
+
+-- table to track add user requests
+CREATE TABLE Add_User_Requests (
+    id_request SERIAL PRIMARY KEY,
+    admin_id INT NOT NULL,
+    user_id INT NOT NULL,
+    tenant_id INT NOT NULL,
+    request_date DATE,
+    status VARCHAR(50),
+    FOREIGN KEY (admin_id) REFERENCES Admins(id),
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (tenant_id) REFERENCES Tenants(id_tenant)
+);
+
+
+Users : Cette table contient toutes les informations relatives aux utilisateurs. Cela inclut les identifiants des utilisateurs, leurs noms, leurs adresses e-mail, leurs identifiants de tenant (si applicable), leurs profils et une indication de leur statut d'administrateur.
+
+Admins : Cette table stocke les informations spécifiques aux administrateurs. Il s'agit principalement de leur identifiant d'administrateur et de leur identifiant de tenant. Notez qu'il y a une relation de clé étrangère entre cette table et la table Users, permettant ainsi de relier un administrateur à son utilisateur correspondant.
+
+Tenants : Cette table conserve les informations relatives aux tenants, notamment leur nom et la date de création. Elle a également une relation de clé étrangère avec la table Admins, qui permet de relier un tenant à son administrateur correspondant.
+
+Licenses : Cette table stocke les informations relatives aux licences disponibles pour chaque tenant. Elle contient le nombre de licences, la date d'expiration et est liée au tenant correspondant via une relation de clé étrangère.
+
+Groups : Cette table contient des informations sur les différents groupes auxquels un utilisateur peut appartenir. Actuellement, elle ne contient que l'identifiant du groupe et le nom du groupe.
+
+User_Groups : Cette table est une table de jonction qui relie les utilisateurs aux groupes. Elle stocke l'identifiant de l'utilisateur et l'identifiant du groupe, et possède des relations de clé étrangère avec les tables Users et Groups.
+
+Add_User_Requests : Cette table suit les demandes faites par les administrateurs pour ajouter de nouveaux utilisateurs. Elle contient des informations sur l'administrateur qui fait la demande, l'utilisateur à ajouter, le tenant concerné, la date de la demande et le statut de la demande. Elle a des relations de clé étrangère avec les tables Admins, Users et Tenants.
+"""
+
+
+Synthèse du projet (Mise à jour)
+
+Dans le cadre de ce projet, nous développons une application destinée à automatiser et à optimiser le processus d'ajout d'utilisateurs à un tenant au sein de notre organisation. Le but est de réduire la charge de travail des administrateurs tout en améliorant l'efficacité globale.
+
+Mise à jour des fonctionnalités
+
+Afin d'améliorer la flexibilité et la convivialité de l'application, nous avons ajouté des fonctionnalités permettant aux administrateurs de faire plusieurs demandes à la fois, c'est-à-dire d'ajouter un ou plusieurs utilisateurs simultanément. Par ailleurs, nous avons introduit un rôle de super utilisateur, ces derniers disposant de privilèges élevés pour gérer plusieurs aspects de l'application, tels que la gestion des licences pour des tenants spécifiques et le contrôle d'accès aux différents environnements.
+
+Implémentation de la base de données
+
+Nous avons défini plusieurs tables pour stocker nos données : Users, Admins, Tenants, Licenses, Groups, User_Groups et Add_User_Requests. Ces tables stockent respectivement les informations sur les utilisateurs, les administrateurs, les tenants, les licences, les groupes, les relations utilisateur-groupe et les demandes d'ajout d'utilisateurs. Des relations de clé étrangère ont été mises en place pour maintenir l'intégrité des données entre les différentes tables.
+
+Connexion à la base de données
+
+En utilisant SQLAlchemy et la bibliothèque databases, nous avons créé une connexion à notre base de données PostgreSQL. Nous avons aussi configuré un middleware CORS dans notre application FastAPI pour gérer les requêtes provenant de notre application React.
+
+Routage
+
+Des routeurs ont été définis pour gérer les différentes entités de notre application : les utilisateurs, les administrateurs, les tenants, les licences, les groupes, les relations utilisateur-groupe et les demandes d'ajout d'utilisateurs. Ces routeurs ont été inclus dans notre application principale FastAPI avec des préfixes de route appropriés.
+
+
+Les admin sont des utilisateurs qui la table admin contient donc ID des users.
+
+je veux qu'on ajoute des logique dans l'appli.
+
+Un utilisateur peut etre promu au rand d'admin, il existera donc dans la table des admins. 
+un admin peut creer des tenants et des groupes, creer des users, ajouter des user à des tenants qui lui appartiennent ( en ce qui concerne l'ajout, il se fait de deux manieres, il y a des user qui sont des Reader et d'autres qui sont des designer. Un reader est automatiquement ajouté au tenant et un designer est ajouté au tenant si et seulement s'il y a encore des licences disponibles sur ce tenant)
+Un tenant peut contenir plusieurs groupes et ajoute un utilisateur à un tenant signifie qu'on l'ajoute à un groupe de ce tenant.
+supprimer un admin reviens à transférer ses tenant à un autre utilisateur
+on ne supprime pas un admin de la table des user, faudrait d'abord le supprimer de la table des admin c a d qu'il ne doit plus etre admin avant d'etre upprimer. autrement dit si on decide de supprimer un user qui est admin la route doit etre capable de le retirer de la table des admins avant de le supprimer.
+
+on doit pouvoir gerer les licences aussi. le nombre, ... a l'ajout d'un user Designer dans un tenant, une licence lui est attribuée, cad on diminue le nombre de licence.

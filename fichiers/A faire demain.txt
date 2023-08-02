@@ -1,0 +1,6 @@
+On peut inscrire un user a un tenant en fonction de son profil et des licenes disponibles.
+
+
+On doit pouvoir mettre une contrainte Unique sur les noms des tenants 
+afin de les utiliser pour l'inscription des user par exemple au lieu de l'id tenant.
+mettre peut etre des noms dans dans la table user groups

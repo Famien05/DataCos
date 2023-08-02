@@ -1,0 +1,18 @@
+/projetDataiku
+  /backend
+    /routers
+      __init__.py
+      users_routers.py
+      admins_routers.py
+      tenants_routers.py
+      groups_routers.py
+      licenses_routers.py
+    /entities
+      __init__.py
+      users_entities.py
+      admins_entities.py
+      tenants_entities.py
+      groups_entities.py
+      licenses_entities.py
+    main.py
+    database.py

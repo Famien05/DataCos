@@ -1,0 +1,80 @@
+CREATE TABLE Users (
+    id SERIAL PRIMARY KEY,
+    uid_user VARCHAR(50) UNIQUE NOT NULL,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    profile VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Admins (
+    id SERIAL PRIMARY KEY,
+    uid_adminVARCHAR(50) NOT NULL,
+    FOREIGN KEY (uid_admin ) REFERENCES Users(uid_user)
+);
+
+CREATE TABLE Tenants (
+    id_tenant SERIAL PRIMARY KEY,
+    tenant_name VARCHAR(50) NOT NULL,
+    uid_admin VARCHAR(50) UNIQUE NOT NULL,
+    created_date DATE NOT NULL,
+    FOREIGN KEY (uid_admin ) REFERENCES Admins(uid_admin )
+);
+
+CREATE TABLE Licenses (
+    id_license SERIAL PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    license_count INT NOT NULL,
+    purchase_date DATE NOT NULL,
+    expiration_date DATE NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (tenant_id) REFERENCES Tenants(id_tenant)
+);
+
+CREATE OR REPLACE FUNCTION check_license_expiration()
+    RETURNS TRIGGER AS
+$BODY$
+BEGIN
+    IF NEW.expiration_date < NOW() THEN
+        NEW.is_active = FALSE;
+    END IF;
+    RETURN NEW;
+END;
+$BODY$
+    LANGUAGE plpgsql;
+
+CREATE TRIGGER license_expiration_trigger
+    BEFORE UPDATE ON Licenses
+    FOR EACH ROW
+    EXECUTE FUNCTION check_license_expiration();
+
+CREATE TABLE Groups (
+    id_group SERIAL PRIMARY KEY,
+    group_name VARCHAR(50) NOT NULL,
+    tenant_id INT NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES Tenants(id_tenant)
+);
+
+CREATE TABLE User_Groups (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    group_id INT NOT NULL,
+    added_date DATE NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (group_id) REFERENCES Groups(id_group)
+);
+
+CREATE TABLE Add_User_Requests (
+    id_request SERIAL PRIMARY KEY,
+    uid_admin INT NOT NULL,
+    uid_user INT NOT NULL,
+    tenant_id INT NOT NULL,
+    group_id INT NOT NULL,
+    request_date DATE NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    FOREIGN KEY (uid_admin ) REFERENCES Admins(uid_admin ),
+    FOREIGN KEY (uid_user) REFERENCES Users(uid_user),
+    FOREIGN KEY (tenant_id) REFERENCES Tenants(id_tenant),
+    FOREIGN KEY (group_id) REFERENCES Groups(id_group)
+);
