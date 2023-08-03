@@ -10,10 +10,10 @@ group_router = APIRouter()
 
 @group_router.post("/", response_model=GroupPublic)
 async def create_group(group: GroupBase, db: Session = Depends(get_db)):
-    # Vérifiez si le tenant_id est valide
-    db_tenant = db.query(Tenant).filter(Tenant.id_tenant == group.tenant_id).first()
+    # Vérifiez si le tenant_name est valide
+    db_tenant = db.query(Tenant).filter(Tenant.tenant_name == group.tenant_name).first()
     if not db_tenant:
-        raise HTTPException(status_code=400, detail="Tenant ID not found")
+        raise HTTPException(status_code=400, detail="Tenant name not found")
     
     db_group = Group(**group.dict())
     db.add(db_group)

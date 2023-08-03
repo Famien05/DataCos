@@ -27,20 +27,27 @@ async def get_users(db: Session = Depends(get_db)):
     return users
 
 
-def create_user_and_add_to_group(user: UserBase, group_id: int, tenant: Tenant, db: Session):
+def create_user_and_add_to_group(user: UserBase, group_name: str, tenant_name: str, db: Session):
     new_user = User(**user.dict())
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
-    user_group = User_Groups(user_id=new_user.id, group_id=group_id, added_date=date.today())
+    # Récupérez l'ID du groupe en utilisant le group_name
+    group = db.query(Group).filter_by(group_name=group_name, tenant_name=tenant_name).first()
+
+    user_group = User_Groups(user_id=new_user.id, group_id=group.id_group, added_date=date.today())
     db.add(user_group)
 
-    add_user_request = Add_User_Requests(uid_admin=tenant.uid_admin, uid_user=new_user.uid_user, tenant_id=tenant.id_tenant, group_id=group_id, request_date=date.today(), status="Added")
+    # Récupérez l'ID du tenant en utilisant le tenant_name
+    tenant = db.query(Tenant).filter_by(tenant_name=tenant_name).first()
+
+    add_user_request = Add_User_Requests(uid_admin=tenant.uid_admin, uid_user=new_user.uid_user, tenant_id=tenant.id_tenant, group_id=group.id_group, request_date=date.today(), status="Added")
     db.add(add_user_request)
 
     db.commit()
     return new_user
+
 
 """
 @router.post("/add_to_tenant/{tenant_id}/group/{group_id}", response_model=UserPublic)
@@ -80,21 +87,21 @@ async def add_user_to_tenant(tenant_id: int, group_id: int, user: UserBase, db: 
         db.commit()
         return new_user  # Retournez l'utilisateur créé
 """
-@router.post("/add_to_tenant/{tenant_id}/group/{group_id}", response_model=UserPublic)
-async def add_user_to_tenant(tenant_id: int, group_id: int, user: UserBase, db: Session = Depends(get_db)):
-    tenant = db.query(Tenant).filter_by(id_tenant=tenant_id).first()
+@router.post("/add_to_tenant/{tenant_name}/group/{group_name}", response_model=UserPublic)
+async def add_user_to_tenant(tenant_name: str, group_name: str, user: UserBase, db: Session = Depends(get_db)):
+    tenant = db.query(Tenant).filter_by(tenant_name=tenant_name).first()
     if not tenant:
         raise HTTPException(status_code=404, detail="Tenant not found")
 
-    group = db.query(Group).filter_by(id_group=group_id, tenant_id=tenant_id).first()
+    group = db.query(Group).filter_by(group_name=group_name, tenant_name=tenant_name).first()
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
 
     if user.profile == "Reader":
-        return create_user_and_add_to_group(user, group_id, tenant, db)
+        return create_user_and_add_to_group(user, group_name, tenant_name, db)
     elif user.profile == "Designer":
-        license = db.query(License).filter_by(tenant_id=tenant_id, is_active=True).first()
+        license = db.query(License).filter_by(tenant_id=tenant.id_tenant, is_active=True).first()
         if not license or license.license_count <= 0:
             raise HTTPException(status_code=400, detail="No licenses available for Designer profile")
         license.license_count -= 1
-        return create_user_and_add_to_group(user, group_id, tenant, db)
+        return create_user_and_add_to_group(user, group_name, tenant_name, db)

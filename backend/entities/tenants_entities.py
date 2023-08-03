@@ -9,7 +9,7 @@ class Tenant(Base):
     __tablename__ = "tenants"
 
     id_tenant = Column(Integer, primary_key=True, index=True)
-    tenant_name = Column(String, nullable=False)
+    tenant_name = Column(String, unique=True, nullable=False)
     uid_admin = Column(String, ForeignKey("admins.uid_admin"), nullable=False)
     created_date = Column(Date)
 
@@ -18,7 +18,7 @@ class TenantBase(BaseModel):
     uid_admin: str
 
 class TenantInDB(TenantBase):
-    id_tenant: int
+    tenant_name: str
     created_date: date
 
     class Config:

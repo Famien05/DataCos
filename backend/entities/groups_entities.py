@@ -8,14 +8,14 @@ class Group(Base):
     __tablename__ = "groups"
 
     id_group = Column(Integer, primary_key=True, index=True)
-    group_name = Column(String(50), nullable=False) # Longueur ajoutée
-    tenant_id = Column(Integer, ForeignKey("tenants.id_tenant"), nullable=False)
-    description = Column(String(255), nullable=False) # Supprimé l'Optional
+    group_name = Column(String(50), unique=True,nullable=False)
+    tenant_name = Column(String, ForeignKey("tenants.tenant_name"), nullable=False)
+    description = Column(String(255), nullable=False)
 
 class GroupBase(BaseModel):
     group_name: str
-    tenant_id: int
-    description: str # Supprimé l'Optional
+    tenant_name: str
+    description: str
 
 class GroupInDB(GroupBase):
     id_group: int

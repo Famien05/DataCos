@@ -11,9 +11,9 @@ license_router = APIRouter()
 @license_router.post("/", response_model=LicensePublic)
 async def create_license(license: LicenseBase, db: Session = Depends(get_db)):
     # Vérifiez si le tenant_id est valide
-    db_tenant = db.query(Tenant).filter(Tenant.id_tenant == license.tenant_id).first()
+    db_tenant = db.query(Tenant).filter(Tenant.tenant_name == license.tenant_name).first()
     if not db_tenant:
-        raise HTTPException(status_code=400, detail="Tenant ID not found")
+        raise HTTPException(status_code=400, detail="Tenant name not found")
 
     db_license = License(**license.dict())
     db.add(db_license)
