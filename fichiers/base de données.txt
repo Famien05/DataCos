@@ -1,4 +1,4 @@
-CREATE TABLE Users (
+CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     uid_user VARCHAR(50) UNIQUE NOT NULL,
     first_name VARCHAR(50) NOT NULL,
@@ -7,28 +7,28 @@ CREATE TABLE Users (
     profile VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE Admins (
+CREATE TABLE admins (
     id SERIAL PRIMARY KEY,
-    uid_adminVARCHAR(50) NOT NULL,
-    FOREIGN KEY (uid_admin ) REFERENCES Users(uid_user)
+    uid_admin VARCHAR(50) UNIQUE NOT NULL,
+    FOREIGN KEY (uid_admin ) REFERENCES users(uid_user) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE Tenants (
+CREATE TABLE tenants (
     id_tenant SERIAL PRIMARY KEY,
-    tenant_name VARCHAR(50) NOT NULL,
+    tenant_name VARCHAR(50) UNIQUE NOT NULL,
     uid_admin VARCHAR(50) UNIQUE NOT NULL,
     created_date DATE NOT NULL,
-    FOREIGN KEY (uid_admin ) REFERENCES Admins(uid_admin )
+    FOREIGN KEY (uid_admin ) REFERENCES admins(uid_admin ) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE Licenses (
+CREATE TABLE licenses (
     id_license SERIAL PRIMARY KEY,
-    tenant_id INT NOT NULL,
+    tenant_name VARCHAR(50) UNIQUE NOT NULL,
     license_count INT NOT NULL,
     purchase_date DATE NOT NULL,
     expiration_date DATE NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (tenant_id) REFERENCES Tenants(id_tenant)
+    FOREIGN KEY (tenant_name) REFERENCES tenants(tenant_name) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE OR REPLACE FUNCTION check_license_expiration()
@@ -48,33 +48,33 @@ CREATE TRIGGER license_expiration_trigger
     FOR EACH ROW
     EXECUTE FUNCTION check_license_expiration();
 
-CREATE TABLE Groups (
+CREATE TABLE groups (
     id_group SERIAL PRIMARY KEY,
-    group_name VARCHAR(50) NOT NULL,
-    tenant_id INT NOT NULL,
+    group_name VARCHAR(50) UNIQUE NOT NULL,
+    tenant_name VARCHAR(50) NOT NULL,
     description VARCHAR(255) NOT NULL,
-    FOREIGN KEY (tenant_id) REFERENCES Tenants(id_tenant)
+    FOREIGN KEY (tenant_name) REFERENCES tenants(tenant_name) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE User_Groups (
+CREATE TABLE user_groups (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
     group_id INT NOT NULL,
     added_date DATE NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES Users(id),
-    FOREIGN KEY (group_id) REFERENCES Groups(id_group)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (group_id) REFERENCES groups(id_group) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE Add_User_Requests (
+CREATE TABLE add_user_requests (
     id_request SERIAL PRIMARY KEY,
-    uid_admin INT NOT NULL,
-    uid_user INT NOT NULL,
+    uid_admin VARCHAR(50) NOT NULL,
+    uid_user VARCHAR(50) NOT NULL,
     tenant_id INT NOT NULL,
     group_id INT NOT NULL,
     request_date DATE NOT NULL,
     status VARCHAR(50) NOT NULL,
-    FOREIGN KEY (uid_admin ) REFERENCES Admins(uid_admin ),
-    FOREIGN KEY (uid_user) REFERENCES Users(uid_user),
-    FOREIGN KEY (tenant_id) REFERENCES Tenants(id_tenant),
-    FOREIGN KEY (group_id) REFERENCES Groups(id_group)
+    FOREIGN KEY (uid_admin ) REFERENCES admins(uid_admin ) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (uid_user) REFERENCES users(uid_user) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id_tenant) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (group_id) REFERENCES groups(id_group) ON DELETE CASCADE ON UPDATE CASCADE
 );
