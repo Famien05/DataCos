@@ -100,7 +100,7 @@ async def add_user_to_tenant(tenant_name: str, group_name: str, user: UserBase, 
     if user.profile == "Reader":
         return create_user_and_add_to_group(user, group_name, tenant_name, db)
     elif user.profile == "Designer":
-        license = db.query(License).filter_by(tenant_id=tenant.id_tenant, is_active=True).first()
+        license = db.query(License).filter_by(tenant_name=tenant.tenant_name, is_active=True).first()
         if not license or license.license_count <= 0:
             raise HTTPException(status_code=400, detail="No licenses available for Designer profile")
         license.license_count -= 1
