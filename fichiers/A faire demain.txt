@@ -4,3 +4,36 @@ On peut inscrire un user a un tenant en fonction de son profil et des licenes di
 On doit pouvoir mettre une contrainte Unique sur les noms des tenants 
 afin de les utiliser pour l'inscription des user par exemple au lieu de l'id tenant.
 mettre peut etre des noms dans dans la table user groups
+
+
+
+
+Si vous souhaitez que les utilisateurs interagissent avec votre base de données PostgreSQL via des API Dataiku, voici une approche étape par étape pour accomplir cela:
+
+1. **Créer un projet Dataiku**:
+   - Si vous n'en avez pas déjà un, créez un nouveau projet.
+
+2. **Importer votre base de données**:
+   - Comme indiqué précédemment, connectez-vous à votre base de données PostgreSQL en créant un nouveau dataset SQL.
+
+3. **Développer des recettes Python pour la logique**:
+   - Sur la base de vos modèles et de la logique que vous avez déjà, créez une ou plusieurs recettes Python pour effectuer des opérations sur vos datasets.
+
+4. **Créer des API dans Dataiku**:
+   - Allez à l'onglet `Déploiements` dans Dataiku.
+   - Cliquez sur `Nouveau service` et choisissez `API Service`.
+   - À l'intérieur de ce service, vous pouvez créer des endpoints pour différentes opérations.
+   - Pour chaque endpoint, vous pouvez définir une recette Python qui sera exécutée lorsque cet endpoint est appelé.
+   - Dans ces recettes, vous pouvez utiliser votre code existant et la bibliothèque `dataiku` pour interagir avec vos datasets.
+
+5. **Exposition de l'API**:
+   - Une fois que vous avez configuré vos endpoints, vous pouvez déployer votre API service.
+   - Dataiku générera un URL que vous pourrez partager avec vos utilisateurs. Ils pourront l'utiliser pour interagir avec votre base de données via les API que vous avez définies.
+
+6. **Sécurisation de l'API**:
+   - Assurez-vous de sécuriser correctement votre API. Dataiku offre plusieurs options pour authentifier et autoriser les utilisateurs à accéder à votre API.
+
+7. **Intégration avec des clients**:
+   - Fournissez l'URL et la documentation de l'API à vos utilisateurs. Ils pourront alors l'intégrer dans leurs applications ou outils pour interagir avec votre base de données.
+
+Notez que cela implique que vous devrez peut-être réécrire ou adapter une partie de votre code pour l'intégrer dans les recettes Python et les endpoints de l'API Dataiku. Toutefois, cela vous offrira une interface robuste et sécurisée pour permettre aux utilisateurs d'interagir avec votre base de données.
