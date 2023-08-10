@@ -16,3 +16,29 @@
       licenses_entities.py
     main.py
     database.py
+
+
+import dataiku
+from dataiku import pandasutils as pdu
+import pandas as pd
+
+# With the public API client (preferred)
+client = dataiku.api_client()
+
+# Function to insert data into a dataset
+def insert_data_into_dataset(client):
+    project = client.get_project("YOUR_PROJECT_KEY")
+    dataset = project.get_dataset("YOUR_DATASET_NAME")
+
+    # Sample data as a pandas DataFrame
+    sample_data = pd.DataFrame({
+        "column1": [value1, value2, value3],
+        "column2": [value4, value5, value6]
+        # Add more columns and data as needed
+    })
+
+    # Insert data into the dataset
+    dataset.write_with_schema(sample_data)
+
+# Call the function to insert data
+insert_data_into_dataset(client)
