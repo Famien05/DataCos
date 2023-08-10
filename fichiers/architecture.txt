@@ -18,27 +18,62 @@
     database.py
 
 
+Bien sûr ! Voici un exemple de code qui vous permet d'afficher les données d'une table Dataiku sous forme de DataFrame et un autre exemple pour insérer des données dans cette même table :
+
+Afficher les données d'une table sous forme de DataFrame :
+
+```python
 import dataiku
-from dataiku import pandasutils as pdu
 import pandas as pd
 
 # With the public API client (preferred)
 client = dataiku.api_client()
 
-# Function to insert data into a dataset
-def insert_data_into_dataset(client):
+# Fonction pour afficher les données d'une table sous forme de DataFrame
+def display_table_data_as_dataframe(client):
     project = client.get_project("YOUR_PROJECT_KEY")
     dataset = project.get_dataset("YOUR_DATASET_NAME")
 
-    # Sample data as a pandas DataFrame
+    # Récupérer les données de la table sous forme de DataFrame
+    dataframe = dataset.get_dataframe()
+
+    # Afficher le DataFrame
+    print(dataframe)
+
+# Appeler la fonction pour afficher les données de la table
+display_table_data_as_dataframe(client)
+```
+
+Assurez-vous de remplacer `"YOUR_PROJECT_KEY"` par la clé de votre projet Dataiku et `"YOUR_DATASET_NAME"` par le nom de la table que vous souhaitez afficher.
+
+Insérer des données dans une table :
+
+```python
+import dataiku
+import pandas as pd
+
+# With the public API client (preferred)
+client = dataiku.api_client()
+
+# Fonction pour insérer des données dans une table
+def insert_data_into_table(client):
+    project = client.get_project("YOUR_PROJECT_KEY")
+    dataset = project.get_dataset("YOUR_DATASET_NAME")
+
+    # Échantillon de données à insérer, en tant que DataFrame Pandas
     sample_data = pd.DataFrame({
         "column1": [value1, value2, value3],
         "column2": [value4, value5, value6]
-        # Add more columns and data as needed
+        # Ajoutez d'autres colonnes et données si nécessaire
     })
 
-    # Insert data into the dataset
-    dataset.write_with_schema(sample_data)
+    # Insérer les données dans la table
+    dataset.write_dataframe(sample_data)
 
-# Call the function to insert data
-insert_data_into_dataset(client)
+# Appeler la fonction pour insérer des données dans la table
+insert_data_into_table(client)
+```
+
+Assurez-vous de remplacer `"YOUR_PROJECT_KEY"` par la clé de votre projet Dataiku et `"YOUR_DATASET_NAME"` par le nom de la table dans laquelle vous souhaitez insérer les données. Modifiez également les noms de colonnes, les valeurs et les types de données pour correspondre à la structure de la table.
+
+Après avoir exécuté ces codes, vous pourrez afficher les données de la table sous forme de DataFrame et insérer de nouvelles données dans la table à partir d'un notebook. Assurez-vous d'avoir les autorisations nécessaires pour accéder à la table et insérer des données.
