@@ -8,5 +8,6 @@ sample_data = pd.DataFrame({
 })
 
 # Insérer les données dans le dataset existant
-dataset = dataiku.Dataset("YOUR_PROJECT_KEY", "YOUR_DATASET_NAME")
+project = dataiku.Project("API_DATAIKU")
+dataset = project.get_dataset("test")
 dataset.write_with_schema(sample_data)
