@@ -1,0 +1,12 @@
+import pandas as pd
+
+# Échantillon de données à insérer, en tant que DataFrame Pandas
+sample_data = pd.DataFrame({
+    "column1": [value1, value2, value3],
+    "column2": [value4, value5, value6]
+    # Ajoutez d'autres colonnes et données si nécessaire
+})
+
+# Insérer les données dans le dataset existant
+dataset = dataiku.Dataset("YOUR_PROJECT_KEY", "YOUR_DATASET_NAME")
+dataset.write_with_schema(sample_data)
