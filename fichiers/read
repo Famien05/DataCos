@@ -1,18 +1,27 @@
 import pandas as pd
 import dataiku
 
-# Créer un DataFrame avec les données à insérer
-data_to_insert = pd.DataFrame({
-    "Nom": ["Nomi", "Nom2", "Nom3"],
-    "Prenom": ["Prenomi", "Prenon2", "Prenom3"],
-    "Age": [25, 30, 22]
-})
+# Clé de votre projet Dataiku
+project_key = "API_DATAIKU"
 
-# Obtenir le dataset (table) existant dans votre projet
-project_key = "VOTRE_CLE_DE_PROJET"
-dataset_name = "NOM_DU_DATASET"  # Le nom de la table dans Dataiku
+# Nom de votre dataset
+dataset_name = "test"
 
+# Obtenir le dataset
 dataset = dataiku.Dataset(project_key, dataset_name)
 
-# Insérer les données dans la table
-dataset.write_with_schema(data_to_insert)
+# Charger les données actuelles du dataset dans un DataFrame
+current_data = dataset.read_dataframe()
+
+# Ajouter une nouvelle ligne (remplacez les valeurs par celles de la nouvelle ligne)
+new_row = {
+    "Nom": "NouveauNom",
+    "Prenom": "NouveauPrenom",
+    "Age": 28
+}
+
+# Ajouter la nouvelle ligne au DataFrame
+current_data = current_data.append(new_row, ignore_index=True)
+
+# Réécrire les données mises à jour dans le dataset
+dataset.write_with_schema(current_data)
