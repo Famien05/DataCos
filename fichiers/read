@@ -25,3 +25,26 @@ current_data = current_data.append(new_row, ignore_index=True)
 
 # Réécrire les données mises à jour dans le dataset
 dataset.write_with_schema(current_data)
+
+
+
+
+
+import dataikuapi
+
+# Créer une instance de DataikuAPI
+host = "https://votre-instance.dataiku.com"  # Remplacez par l'URL de votre instance Dataiku
+api_key = "votre_clé_API"  # Remplacez par votre clé API
+client = dataikuapi.DSSClient(host, api_key)
+
+# Récupérer le projet et le dataset
+project_key = "API_DATAIKU"  # Remplacez par la clé de votre projet
+dataset_name = "test"  # Remplacez par le nom de votre dataset
+project = client.get_project(project_key)
+dataset = project.get_dataset(dataset_name)
+
+# Lire les données du dataset dans un DataFrame
+dataframe = dataset.get_dataframe()
+
+# Afficher les premières lignes du DataFrame
+print(dataframe.head())
