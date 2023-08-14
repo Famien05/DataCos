@@ -1,13 +1,14 @@
 import pandas as pd
+import dataiku
 
 # Échantillon de données à insérer, en tant que DataFrame Pandas
 sample_data = pd.DataFrame({
-    "Nom": ["Nom1", "Nom2", "Nom3"],
-    "Prenom": ["Prenom1", "Prenom2", "Prenom3"],
+    "Nom": ["Nomi", "Nom2", "Nom3"],
+    "Prenom": ["Prenomi", "Prenon2", "Prenom3"],
     "Age": [25, 30, 22]
 })
 
 # Insérer les données dans le dataset existant
 project = dataiku.Project("API_DATAIKU")
-dataset = project.get_dataset("test")
-dataset.write_with_schema(sample_data)
+input_dataset = dataiku.Dataset("API_DATAIKU", "test")  # Remplacez "API_DATAIKU" par votre projet et "test" par votre dataset
+input_dataset.write_with_schema(sample_data)
