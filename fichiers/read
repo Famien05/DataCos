@@ -1,17 +1,25 @@
-import pandas as pd
 import dataiku
 
-# Clé de votre projet Dataiku
+# Clé API de votre projet Dataiku
+api_key = "VOTRE_CLE_API"
+
+# Nom de votre projet Dataiku
 project_key = "API_DATAIKU"
 
 # Nom de votre dataset
 dataset_name = "test"
 
+# Se connecter au projet Dataiku en utilisant la clé API
+client = dataiku.api_client(api_key=api_key)
+
+# Obtenir le projet
+project = client.get_project(project_key)
+
 # Obtenir le dataset
-dataset = dataiku.Dataset(project_key, dataset_name)
+dataset = project.get_dataset(dataset_name)
 
 # Charger les données actuelles du dataset dans un DataFrame
-current_data = dataset.read_dataframe()
+current_data = dataset.get_dataframe()
 
 # Ajouter une nouvelle ligne (remplacez les valeurs par celles de la nouvelle ligne)
 new_row = {
@@ -25,8 +33,6 @@ current_data = current_data.append(new_row, ignore_index=True)
 
 # Réécrire les données mises à jour dans le dataset
 dataset.write_with_schema(current_data)
-
-
 
 
 
