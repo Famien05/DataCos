@@ -1,10 +1,10 @@
 from fastapi import APIRouter
-import dataiku
+import dataikuapi
 
 # Créer une instance du client Dataiku en utilisant l'hostname et la clé API
-dataiku_hostname = "VOTRE_HOSTNAME_DATAIKU"
+dataiku_hostname = "https://design-dataiku.dev.echonet/"
 dataiku_api_key = "VOTRE_CLE_API_DATAIKU"
-client = dataiku.api_client(host=dataiku_hostname, api_key=dataiku_api_key)
+client = dataikuapi.DSSClient(dataiku_hostname, dataiku_api_key)
 
 # Désactiver la vérification du certificat SSL
 client._session.verify = False
@@ -12,17 +12,23 @@ client._session.verify = False
 # Créer un routeur FastAPI
 router = APIRouter()
 
+# Initialiser l'ID auto-incrémenté
+id = 2
+
 @router.post("/insert-into-dataset")
 async def insert_into_dataset(user: UserBase):
+    global id
+    
     # Nom de votre projet et nom du dataset
-    project_key = "VOTRE_CLE_PROJET_DATAIKU"
-    dataset_name = "VOTRE_NOM_DATASET_DATAIKU"
+    project_key = "API DATAIKU"
+    dataset_name = "test"
     
     # Obtenir le dataset depuis Dataiku
     dataset = client.get_project(project_key).get_dataset(dataset_name)
     
     # Ajouter une nouvelle ligne avec les données de l'utilisateur
     new_row = {
+        "id": id,
         "uid_user": user.uid_user,
         "first_name": user.first_name,
         "last_name": user.last_name,
@@ -31,12 +37,15 @@ async def insert_into_dataset(user: UserBase):
     }
     
     # Charger les données actuelles du dataset
-    current_data = dataset.get_dataframe()
+    current_data = dataset.read_dataframe()
     
     # Ajouter la nouvelle ligne au DataFrame
     current_data = current_data.append(new_row, ignore_index=True)
     
     # Réécrire les données mises à jour dans le dataset
     dataset.write_with_schema(current_data)
+    
+    # Incrémenter l'ID auto-incrémenté
+    id += 1
     
     return {"message": "Données insérées avec succès dans le dataset."}
