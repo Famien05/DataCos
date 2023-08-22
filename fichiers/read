@@ -1,3 +1,44 @@
+import dataikuapi
+
+# Informations d'authentification
+host = "https://YOUR_DATAIKU_INSTANCE_URL"
+api_key = "YOUR_API_KEY"
+
+# Se connecter à l'instance Dataiku
+client = dataikuapi.DSSClient(host, api_key)
+
+# Spécifier le projet et le dataset
+project_key = "YOUR_PROJECT_KEY"
+dataset_name = "test_prepared"
+
+# Obtenir le dataset
+project = client.get_project(project_key)
+dataset = project.get_dataset(dataset_name)
+
+# Charger les données actuelles du dataset dans un DataFrame
+current_data = dataset.get_dataframe()
+
+# Ajouter une nouvelle ligne au DataFrame
+new_row = {
+    "id": 3,
+    "uid user": "user 777",
+    "first name": "newuser",
+    "last name": "newuser",
+    "email": "newuser@gmail.com",
+    "profile": "Reader"
+}
+current_data = current_data.append(new_row, ignore_index=True)
+
+# Réécrire les données mises à jour dans le dataset
+dataset.write_with_schema(current_data)
+
+
+
+
+
+
+
+
 from fastapi import APIRouter
 import dataikuapi
 
