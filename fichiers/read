@@ -1,55 +1,31 @@
 import dataiku
+from fastapi import APIRouter
+from entities.users_entities import UserBase
+from datetime import date
 
-# Clé API de votre projet Dataiku
-api_key = "VOTRE_CLE_API"
+router = APIRouter()
 
-# Nom de votre projet Dataiku
-project_key = "API_DATAIKU"
+@router.post("/", response_model=UserBase)
+async def create_user(user: UserBase):
+    # Ajouter l'utilisateur au dataset Dataiku
+    dataiku_api_key = "VOTRE_CLE_API_DATAIKU"
+    dataiku_project_key = "API_DATAIKU"
+    dataiku_dataset_name = "users"
+    
+    dataiku_client = dataiku.api_client(api_key=dataiku_api_key)
+    dataiku_project = dataiku_client.get_project(dataiku_project_key)
+    dataiku_dataset = dataiku_project.get_dataset(dataiku_dataset_name)
 
-# Nom de votre dataset
-dataset_name = "test"
+    # Créer un enregistrement à ajouter au dataset
+    dataset_record = {
+        "uid_user": user.uid_user,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "email": user.email,
+        "profile": user.profile
+    }
 
-# Se connecter au projet Dataiku en utilisant la clé API
-client = dataiku.api_client(api_key=api_key)
+    # Ajouter l'enregistrement au dataset
+    dataiku_dataset.write_with_schema([dataset_record])
 
-# Obtenir le projet
-project = client.get_project(project_key)
-
-# Obtenir le dataset
-dataset = project.get_dataset(dataset_name)
-
-# Charger les données actuelles du dataset dans un DataFrame
-current_data = dataset.get_dataframe()
-
-# Ajouter une nouvelle ligne (remplacez les valeurs par celles de la nouvelle ligne)
-new_row = {
-    "Nom": "NouveauNom",
-    "Prenom": "NouveauPrenom",
-    "Age": 28
-}
-
-# Ajouter la nouvelle ligne au DataFrame
-current_data = current_data.append(new_row, ignore_index=True)
-
-# Réécrire les données mises à jour dans le dataset
-dataset.write_with_schema(current_data)
-
-
-
-from dataikuapi import DSSClient
-
-# Créer une instance de DataikuAPI avec la vérification SSL désactivée
-host = "https://design-dataiku.dev.echonet" # Remplacez par l'URL de votre instance Dataiku
-api_key = "130ZUjDY1PoZCUs]" # Remplacez par votre clé API
-client = DSSClient(host, api_key, verify_ssl=False)
-
-# Récupérer le projet et le dataset
-project_key = "API_DATAIKU" # Remplacez par la clé de votre projet
-dataset_name = "test" # Remplacez par le nom de votre dataset
-project = client.get_project(project_key)
-dataset = project.get_dataset(dataset_name)
-
-# Liste des datasets
-datasets_list = project.list_datasets()
-for dataset in datasets_list:
-    print(dataset["name"], dataset["type"])
+    return user
