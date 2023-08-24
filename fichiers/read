@@ -1,3 +1,32 @@
+
+
+import requests
+
+# Informations d'authentification
+host = "https://design-dataiku.dev.echonet/"
+api_key = "JydeJdbSw4SXOJLH5wCaTyJbwaj6gvta"
+
+# Spécifier le projet et le dataset
+project_key = "API DATAIKU"
+dataset_name = "test_prepared"
+
+# Construire l'URL de l'API
+api_url = f"{host}publicapi/projects/{project_key}/datasets/{dataset_name}/data"
+
+# Ajouter les en-têtes d'authentification
+headers = {
+    "Authorization": f"Bearer {api_key}"
+}
+
+# Effectuer la requête GET pour obtenir les données du dataset
+response = requests.get(api_url, headers=headers, verify=False)
+
+# Traiter la réponse JSON
+data = response.json()
+
+# Vous pouvez maintenant traiter les données selon vos besoins
+print(data)
+
 curl -s -u username:password "URL_du_site" | grep -o 'expires="[^"]*"' | awk -F '"' '{print $2}'
 
 import dataikuapi
