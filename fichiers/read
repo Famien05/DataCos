@@ -1,3 +1,58 @@
+# Import des modules nécessaires
+import dataiku
+import pandas as pd
+
+# Fonction pour l'endpoint
+def add_new_data(request):
+    # Extraction des données de la requête
+    data = request.get_json()
+    
+    # Spécifiez le projet et le dataset
+    project_key = "API_MARKETPLACE"
+    dataset_name = "test_prepared"
+
+    # Obtenir le dataset
+    dataset = dataiku.Dataset(dataset_name, project_key)
+
+    # Charger les données actuelles du dataset dans un DataFrame
+    current_data = dataset.get_dataframe()
+
+    # Construire la nouvelle ligne à partir de la requête
+    new_row = pd.DataFrame({
+        "id": [data['id']],
+        "uid_user": [data['uid_user']],
+        "first_name": [data['first_name']],
+        "last_name": [data['last_name']],
+        "email": [data['email']],
+        "profile": [data['profile']]
+    })
+
+    # Ajouter la nouvelle ligne au Dataframe
+    current_data = pd.concat([current_data, new_row], ignore_index=True)
+
+    # Redécrire les données mises à jour dans le dataset
+    dataset.write_with_schema(current_data)
+    
+    return {"status": "success", "message": "Data added successfully"}
+
+
+
+
+{
+    "id": 32,
+    "uid_user": "user888",
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "johndoe@gmail.com",
+    "profile": "Reader"
+}
+
+
+
+
+
+
+
 import dataiku
 import pandas as pd
 
