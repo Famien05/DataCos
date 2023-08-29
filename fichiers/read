@@ -1,31 +1,44 @@
 
 
-import requests
+import dataiku
+import dataikuapi
+import pandas as pd
 
-# Informations d'authentification
-host = "https://design-dataiku.dev.echonet/"
-api_key = "JydeJdbSw4SXOJLH5wCaTyJbwaj6gvta"
+dataiku.set_remote_dss("https://dataiku-demo.dev-echonet/","InWeqTNWnL1H4r03oygjnesbSmSpXbIN",no_check_certificate=True)
 
-# Spécifier le projet et le dataset
-project_key = "API DATAIKU"
+# CIA de votre projet Dataiku
+project_key = "API_MARKETPLACE"
+
+# Nom de votre dataset
 dataset_name = "test_prepared"
 
-# Construire l'URL de l'API
-api_url = f"{host}publicapi/projects/{project_key}/datasets/{dataset_name}/data"
+# Obtenir le dataset
+dataset = dataiku.Dataset(dataset_name, project_key)
 
-# Ajouter les en-têtes d'authentification
-headers = {
-    "Authorization": f"Bearer {api_key}"
-}
+# Charger les donnes actuelles du dataset dans un DataFrame
+current_data = dataset.get_dataframe()
 
-# Effectuer la requête GET pour obtenir les données du dataset
-response = requests.get(api_url, headers=headers, verify=False)
+print(current_data)
 
-# Traiter la réponse JSON
-data = response.json()
+# Ajouter une nouvelle ligne (remplacez les valeurs par celles de la nouvelle ligne)
+new_row = pd.DataFrame({
+    "id": [31],
+    "uid_user": ["user777"],
+    "first_name": ["newuser"],
+    "last_name": ["newuser"],
+    "email": ["newuser@gmail.com"],
+    "profile": ["Reader"]
+})
 
-# Vous pouvez maintenant traiter les données selon vos besoins
-print(data)
+# Ajouter la nouvelle ligne au Dataframe
+current_data = pd.concat([current_data, new_row], ignore_index=True)
+
+# Redécrire les données mises à jour dans le dataset
+dataset.write_with_schema(current_data)
+
+
+
+
 
 curl -s -u username:password "URL_du_site" | grep -o 'expires="[^"]*"' | awk -F '"' '{print $2}'
 
