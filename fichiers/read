@@ -1,3 +1,70 @@
+import dataiku
+import pandas as pd
+
+def add_row_to_dataiku_dataset(id, uid_user, first_name, last_name, email, profile):
+    """
+    Ajoute une nouvelle ligne à un dataset Dataiku.
+
+    Args:
+    - id (int): ID de l'utilisateur.
+    - uid_user (str): UID de l'utilisateur.
+    - first_name (str): Prénom de l'utilisateur.
+    - last_name (str): Nom de famille de l'utilisateur.
+    - email (str): Email de l'utilisateur.
+    - profile (str): Profil de l'utilisateur.
+
+    Returns:
+    - DataFrame: Le dataset mis à jour.
+    """
+    # Configuration Dataiku
+    dataiku.set_remote_dss("https://dataiku-demo.dev-echonet/","InWeqTNWnL1H4r03oygjnesbSmSpXbIN",no_check_certificate=True)
+
+    # CIA de votre projet Dataiku
+    project_key = "API_MARKETPLACE"
+    
+    # Nom de votre dataset
+    dataset_name = "test_prepared"
+    
+    # Obtenir le dataset
+    dataset = dataiku.Dataset(dataset_name, project_key)
+    
+    # Charger les donnes actuelles du dataset dans un DataFrame
+    current_data = dataset.get_dataframe()
+
+    # Afficher les données actuelles
+    print("Données actuelles:")
+    print(current_data.head())
+    print("...")
+
+    # Créer un DataFrame pour la nouvelle ligne à partir des paramètres
+    new_row_df = pd.DataFrame({
+        "id": [id],
+        "uid_user": [uid_user],
+        "first_name": [first_name],
+        "last_name": [last_name],
+        "email": [email],
+        "profile": [profile]
+    })
+
+    # Ajouter la nouvelle ligne au Dataframe
+    updated_data = pd.concat([current_data, new_row_df], ignore_index=True)
+
+    # Afficher les données mises à jour
+    print("\nDonnées après l'ajout:")
+    print(updated_data.tail())
+    print("...")
+
+    # Redécrire les données mises à jour dans le dataset
+    dataset.write_with_schema(updated_data)
+
+    return updated_data
+
+# Utilisation de la fonction
+add_row_to_dataiku_dataset(31, "user777", "newuser", "newuser", "newuser@gmail.com", "Reader")
+
+
+
+
 
 
 import dataiku
