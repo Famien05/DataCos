@@ -1,4 +1,73 @@
-   # Vérifiez le profil et le statut admin
+
+def api_py_function(users):
+    import dataikuapi
+    import pandas as pd
+    import urllib3
+    import dataiku
+
+    # ... [la même initialisation que vous avez déjà] ...
+
+    # Charger les données actuelles du dataset dans un DataFrame
+    current_data = dataset.get_dataframe()
+
+    new_rows = []
+
+    for user in users:
+        # Vérifiez les entrées pour chaque utilisateur
+        uid = user.get("i_UID")
+        email = user.get("profil")
+        admin = user.get("admin")
+        profile = user.get("groupe")
+
+        if email in current_data['profil'].values:
+            return {"status": "error", "message": f"Email {email} already exists in the dataset."}
+
+        if uid in current_data['i_UID'].values:
+            return {"status": "error", "message": f"UID {uid} already exists in the dataset."}
+
+        if profile not in ["Reader", "Designer"]:
+            return {"status": "error", "message": "Invalid profile value. Accepted values are 'Reader' or 'Designer'."}
+
+        if not isinstance(admin, bool):
+            return {"status": "error", "message": "Admin value should be a boolean (True or False)."}
+
+        # Si tout est correct, ajoutez l'utilisateur à la liste des nouvelles lignes
+        new_rows.append(user)
+
+    # Convertir la liste des nouvelles lignes en DataFrame
+    new_data = pd.DataFrame(new_rows)
+
+    # Ajouter les nouvelles lignes au Dataframe actuel
+    updated_data = pd.concat([current_data, new_data], ignore_index=True)
+
+    # Redécrire les données mises à jour dans le dataset
+    dataset.write_with_schema(updated_data)
+
+    return {"status": "success", "message": "Data added successfully"}
+
+
+[
+    {
+        "tenant": "example_tenant1",
+        "i_UID": "user901",
+        "profil": "john.doe@example.com",
+        "groupe": "Reader",
+        "admin": true
+    },
+    {
+        "tenant": "example_tenant2",
+        "i_UID": "user902",
+        "profil": "jane.doe@example.com",
+        "groupe": "Designer",
+        "admin": false
+    }
+]
+
+
+
+
+
+# Vérifiez le profil et le statut admin
     if profile not in ["Reader", "Designer"]:
         return {"status": "error", "message": "Invalid profile value. Accepted values are 'Reader' or 'Designer'."}
     
