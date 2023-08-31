@@ -1,3 +1,13 @@
+   # Vérifiez le profil et le statut admin
+    if profile not in ["Reader", "Designer"]:
+        return {"status": "error", "message": "Invalid profile value. Accepted values are 'Reader' or 'Designer'."}
+    
+    if not isinstance(admin, bool):
+        return {"status": "error", "message": "Admin value should be a boolean (True or False)."}
+
+
+
+
 def api_py_function(id, uid_user, first_name, last_name, email, profile):
     import dataikuapi
     import pandas as pd
