@@ -28,7 +28,10 @@ def api_py_function(id, uid_user, first_name, last_name, email, profile):
 
     if uid_user in current_data['uid_user'].values:
         return {"status": "error", "message": "UID User already exists in the dataset."}
-
+    if current_data.empty or pd.isna(current_data['id'].max()):
+        new_id = 1
+    else:
+        new_id = current_data['id'].max() + 1
     # Ajouter une nouvelle ligne
     new_row = pd.DataFrame({
         "id": [id],
