@@ -31,6 +31,78 @@ def insertion_user(users):
         tenant = user.get("tenant")
         groupe = user.get("groupe")
 
+        if i_UID in current_data['i_UID'].values:
+            results.append({"i_UID": i_UID, "status": "error", "message": "🚫 L'ID utilisateur '{}' existe déjà.".format(i_UID)})
+            continue
+
+        if profil not in ["Reader", "Designer"]:
+            results.append({"i_UID": i_UID, "status": "error", "message": "🚫 Profil '{}' non valide.".format(profil)})
+            continue
+
+        if not isinstance(admin, bool):
+            results.append({"i_UID": i_UID, "status": "error", "message": "🚫 Valeur admin invalide."})
+            continue
+
+        # Incrémenter l'ID
+        if current_data.empty or pd.isna(current_data['id'].max()):
+            new_id = 1
+        else:
+            new_id = current_data['id'].max() + 1
+
+        current_data = current_data.append({
+            "id": new_id,
+            "Tenant": tenant,
+            "i_UID": i_UID,
+            "Profil": profil,
+            "Groupes": groupe,
+            "Admin": admin
+        }, ignore_index=True)
+
+        results.append({"i_UID": i_UID, "status": "success", "message": "✅ Utilisateur '{}' ajouté.".format(i_UID)})
+
+    # Mise à jour de la base de données
+    dataset.write_with_schema(current_data)
+
+    # Convertir les résultats en dataframe pour affichage sous forme de tableau
+    return pd.DataFrame(results)
+
+
+
+
+
+def insertion_user(users):
+    import dataikuapi
+    import pandas as pd
+    import urllib3
+    import dataiku
+
+    # Désactiver l'avertissement SSL
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+    # Configuration Dataiku
+    dataiku.set_remote_dss("https://s02v19900033.fr.net.intra:10443", "hnleqTNinL1H4r03oyginesbSmSpXbIN", no_check_certificate=True)
+    
+    # CIA de votre projet Dataiku
+    project_key = "API_MARKETPLACE"
+
+    # Nom de votre dataset
+    dataset_name = "dataset_habillitation_marketplace"
+
+    # Obtenir le dataset
+    dataset = dataiku.Dataset(dataset_name, project_key)
+
+    # Charger les données actuelles du dataset dans un DataFrame
+    current_data = dataset.get_dataframe()
+
+    results = []
+
+    for user in users:
+        i_UID = user.get("i_UID")
+        profil = user.get("profil")
+        admin = user.get("admin")
+        tenant = user.get("tenant")
+        groupe = user.get("groupe")
+
         # Vérifier si l'ID de l'utilisateur existe déjà
         if i_UID in current_data['i_UID'].values:
             results.append({"i_UID": i_UID, "status": "error", "message": "ID User already exists in the dataset."})
