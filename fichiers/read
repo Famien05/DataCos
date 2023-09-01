@@ -32,6 +32,90 @@ def insertion_user(users):
         tenant = user.get("tenant")
         groupe = user.get("groupe")
 
+        if not all([i_UID, profil, admin, tenant, groupe]):
+            results.append({"status": "error", "message": "Some required fields are missing for one of the users."})
+            continue
+
+        if i_UID in current_data['i_UID'].values:
+            results.append({"i_UID": i_UID, "status": "error", "message": "ID User already exists in the dataset."})
+            continue
+
+        if profil not in ["Reader", "Designer"]:
+            results.append({"i_UID": i_UID, "status": "error", "message": "Invalid profile value. Accepted values are 'Reader' or 'Designer'."})
+            continue
+
+        if not isinstance(admin, bool):
+            results.append({"i_UID": i_UID, "status": "error", "message": "Admin value should be a boolean (True or False)."})
+            continue
+
+        # Incrémenter l'ID
+        if current_data.empty or pd.isna(current_data['id'].max()):
+            new_id = 1
+        else:
+            new_id = current_data['id'].max() + 1
+
+        # Ajouter la nouvelle ligne à la liste des nouvelles entrées
+        new_rows.append({
+            "id": new_id,
+            "Tenant": tenant,
+            "i_UID": i_UID,
+            "Profil": profil,
+            "Groupes": groupe,
+            "Admin": admin
+        })
+
+        results.append({"i_UID": i_UID, "status": "success", "message": "Data added successfully"})
+
+    # Convertir la liste des nouvelles entrées en DataFrame
+    new_data = pd.DataFrame(new_rows)
+
+    # Ajouter les nouvelles lignes au DataFrame existant
+    updated_data = pd.concat([current_data, new_data], ignore_index=True)
+
+    # Redécrire les données mises à jour dans le dataset
+    dataset.write_with_schema(updated_data)
+
+    return results
+
+
+
+
+
+
+def insertion_user(users):
+    import dataikuapi
+    import pandas as pd
+    import urllib3
+    import dataiku
+
+    # Désactiver l'avertissement SSL
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+    # Configuration Dataiku
+    dataiku.set_remote_dss("https://s02v19900033.fr.net.intra:10443", "hnleqTNinL1H4r03oyginesbSmSpXbIN", no_check_certificate=True)
+    
+    # Clé de votre projet Dataiku
+    project_key = "API_MARKETPLACE"
+
+    # Nom de votre dataset
+    dataset_name = "dataset_habillitation_marketplace"
+
+    # Obtenir le dataset
+    dataset = dataiku.Dataset(dataset_name, project_key)
+
+    # Charger les données actuelles du dataset dans un DataFrame
+    current_data = dataset.get_dataframe()
+
+    new_rows = []
+    results = []
+
+    for user in users:
+        i_UID = user.get("i_UID")
+        profil = user.get("profil")
+        admin = user.get("admin")
+        tenant = user.get("tenant")
+        groupe = user.get("groupe")
+
         if i_UID in current_data['i_UID'].values:
             results.append({"i_UID": i_UID, "status": "error", "message": "ID User already exists in the dataset."})
             continue
