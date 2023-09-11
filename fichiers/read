@@ -1,3 +1,33 @@
+{
+  "users": [
+      {
+          "i_uid": {
+              "email": "famienleroi.amoin@gmail.com",
+              "name": "Famien Le Roi AMOIN",
+              "uid": "f45933"
+          },
+          "tenant": "tenant_1",
+          "profil": "Designer",
+          "groupes": ["groupe_1", "groupe_2"],
+          "admin": True
+      },
+      {
+          "i_uid": {
+              "email": "example@example.com",
+              "name": "John Doe",
+              "uid": "f45934"
+          },
+          "tenant": "tenant_2",
+          "profil": "Reader",
+          "groupes": ["groupe_3"],
+          "admin": False
+      }
+  ]
+}
+
+
+
+
 def insertion_user(users):
     import dataikuapi
     import pandas as pd
