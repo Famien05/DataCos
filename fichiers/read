@@ -1,3 +1,69 @@
+import hvac
+import time
+
+# Configuration Vault
+vault_url = 'http://adresse-de-vault:8200'  # Remplacez par l'URL de votre instance Vault
+cert_path = '/chemin/vers/votre/certificat.pem'
+key_path = '/chemin/vers/votre/cle-privée.pem'
+ca_path = '/chemin/vers/votre/autorité-de-certification.pem'
+
+# Variables de token
+vault_token = None
+token_expiry = 0
+
+# Durée en secondes avant l'expiration du token pour renouveler
+token_renew_threshold = 300  # Par exemple, 5 minutes avant expiration
+
+# Fonction pour récupérer un token
+def get_token():
+    client = hvac.Client(url=vault_url, cert=(cert_path, key_path), verify=ca_path)
+    response = client.auth.cert.login()
+    if response is not None and 'auth' in response and 'client_token' in response['auth']:
+        return response['auth']['client_token']
+    else:
+        raise Exception('Impossible de récupérer le token depuis Vault.')
+
+# Fonction pour vérifier si le token expire
+def is_token_expired():
+    global token_expiry
+    current_time = time.time()
+    return token_expiry <= current_time
+
+# Fonction pour obtenir le token, en le renouvelant si nécessaire
+def get_or_renew_token():
+    global vault_token
+    global token_expiry
+
+    if vault_token is None or is_token_expired():
+        vault_token = get_token()
+        token_info = hvac.Client(url=vault_url, token=vault_token, verify=ca_path).lookup_token()
+        token_expiry = token_info['data']['expire_time']
+
+    return vault_token
+
+# Fonction pour extraire le mot de passe de connexion PostgreSQL depuis Vault
+def get_postgres_credentials():
+    token = get_or_renew_token()
+    client = hvac.Client(url=vault_url, token=token, verify=ca_path)
+    postgres_credentials = client.read('path/to/postgres/secret')  # Remplacez par le chemin approprié dans Vault
+    if postgres_credentials is not None and 'data' in postgres_credentials:
+        return postgres_credentials['data']
+    else:
+        raise Exception('Impossible de récupérer les informations PostgreSQL depuis Vault.')
+
+# Fonction principale
+def main():
+    postgres_credentials = get_postgres_credentials()
+    
+    # Utilisez postgres_credentials pour établir une connexion à la base de données PostgreSQL
+
+if __name__ == '__main__':
+    main()
+
+
+
+
+
 import os
 import json
 
