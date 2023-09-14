@@ -1,3 +1,54 @@
+
+import sys
+import requests
+import datetime  # Importez le module datetime pour travailler avec les dates
+
+# Cette variable stocke la date d'expiration du token
+expiration_date = None
+
+def getToken(Auth_name, file_cert, file_key, Namespace, url_vault):
+    global expiration_date  # Utilisez une variable globale pour stocker la date d'expiration
+
+    try:
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+        cert = (file_cert, file_key)
+        data = {
+            "name": Auth_name
+        }
+        url = url_vault + "v1/" + Namespace + "/auth/cert_qual/login"
+        
+        # Vérifiez si le token a expiré ou si la date d'expiration est inconnue
+        if expiration_date is None or datetime.datetime.now() > expiration_date:
+            print("Obtention d'un nouveau token...")
+            response = requests.post(url, headers=headers, data=data, cert=cert, verify=False)
+            print("response:", response)
+            request = response.json()
+            Token = request.get("auth").get('client_token')
+            
+            # Définissez la nouvelle date d'expiration du token (par exemple, 1 heure à partir de maintenant)
+            expiration_date = datetime.datetime.now() + datetime.timedelta(hours=1)
+            
+            print("Nouveau token obtenu.")
+        else:
+            print("Utilisation du token existant.")
+            Token = None  # Utilisez le token existant
+        
+        return Token
+    except Exception as e:
+        print("Une erreur s'est produite lors de l'obtention du token :", e)
+        return None
+
+# Appel de la fonction getToken pour obtenir le token
+# Vous pouvez maintenant appeler cette fonction chaque fois que vous avez besoin d'un token
+
+
+
+
+
+
+
 import hvac
 import time
 
