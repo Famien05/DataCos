@@ -1,3 +1,57 @@
+import os
+import json
+
+# Variables pour mettre en cache le token et le mot de passe
+TOKEN_CACHE = None
+PASSWORD_CACHE = None
+
+def get_token(cmd):
+    global TOKEN_CACHE
+
+    # Si le token est déjà dans le cache, le retourner directement
+    if TOKEN_CACHE:
+        return TOKEN_CACHE
+
+    stream = os.popen(cmd)
+    output = stream.read()
+    json_output = json.loads(output)
+    TOKEN_CACHE = json_output["auth"]["client_token"]
+    return TOKEN_CACHE
+
+def get_pw(cmd):
+    global PASSWORD_CACHE
+
+    # Si le mot de passe est déjà dans le cache, le retourner directement
+    if PASSWORD_CACHE:
+        return PASSWORD_CACHE
+
+    stream = os.popen(cmd)
+    output = stream.read()
+    json_output = json.loads(output)
+    PASSWORD_CACHE = json_output["data"]["password"]
+    return PASSWORD_CACHE
+
+cert_pfx = "/apps/learoit/vault/ap08374-auth-hprod-learnit.crt"
+cert_key = "/apps/learoit/vault/ap08374-auth-hprod-learnit.key"
+json_token_cmd = f"curl --cert {cert_pfx} --key {cert_key} -d 'name=auth-learnit'"
+
+BU = "DATA"
+BL = "BIT"
+Ecosystem = "EC012100171"
+PostgresInst = "pg081003199"
+PostgresUser = "static-stage"
+url_vault = "https://hvault.staging.echonet"
+
+url_login = f"{url_vault}/v1/{BU}/{BL}/{Ecosystem}/auth/cert/login"
+cmd_login = f"{json_token_cmd} {url_login}"
+token = get_token(cmd_login)
+
+url_pw = f"{url_vault}/v1/database/postgres/{PostgresInst}/static-creds/{PostgresUser}"
+cmd_pw = f"curl -H 'Accept: */*' -H 'X-Vault-Token: {token}' -H 'X-Vault-Namespace: {BU}/{BL}/{Ecosystem}' -H 'X-Vault-Request: true' {url_pw}"
+password = get_pw(cmd_pw)
+
+print(password)
+
 {
   "users": [
       {
