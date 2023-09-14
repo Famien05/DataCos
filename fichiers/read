@@ -1,3 +1,55 @@
+import time
+
+def getToken(Auth_name, file_cert, file_key, Namespace, url_vault):
+    try:
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+        cert = (file_cert, file_key)
+        data = {
+            "name": Auth_name
+        }
+        url = url_vault + "v1/" + Namespace + "/auth/cert_qual/login"
+        print("url:", url)
+        print("data:", data)
+        print("cert", cert)
+        response = requests.post(url, headers=headers, data=data, cert=cert, verify=False)
+        print("response:", response)
+        request = response.json()
+        print("request:", request)
+        
+        # Vérifier le TTL du token
+        Token = request.get("auth").get('client_token')
+        ttl = request.get("auth").get('lease_duration')
+        
+        # Vérifier si le token a expiré
+        if ttl > 0:
+            current_time = int(time.time())
+            expiration_time = current_time + ttl
+            if expiration_time > current_time:
+                return Token  # Le token est valide, renvoyer le même token
+        
+        # Le token a expiré, récupérer un nouveau token
+        print("Le token a expiré. Récupération d'un nouveau token.")
+        new_token = requestNewToken(Auth_name, file_cert, file_key, Namespace, url_vault)
+        return new_token
+    except Exception as e:
+        print("Une erreur s'est produite :", str(e))
+        return None  # Gérer l'erreur comme vous le souhaitez
+
+# Fonction pour récupérer un nouveau token
+def requestNewToken(Auth_name, file_cert, file_key, Namespace, url_vault):
+    # Mettez ici votre code pour récupérer un nouveau token, similaire à la fonction getToken
+    # Vous pouvez appeler cette fonction depuis getToken lorsque le token a expiré
+    pass
+
+
+
+
+
+
+
+
 
 import sys
 import requests
