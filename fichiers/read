@@ -1,3 +1,55 @@
+import os
+import json
+import time
+
+def getToken(Auth_name, file_cert, file_key, Namespace, url_vault):
+    try:
+        token_file = "vault_token.json"
+        
+        # Vérifie si un fichier de token existe
+        if os.path.exists(token_file):
+            with open(token_file, "r") as file:
+                token_data = json.load(file)
+            expiration_time = token_data.get("expiration_time", 0)
+            
+            # Vérifie si le token est encore valide
+            if expiration_time > time.time():
+                print("Utilisation du token existant.")
+                return token_data["token"]
+
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+        
+        cert = (file_cert, file_key)
+        data = json.dumps({"name": Auth_name})
+        url = url_vault + "v1/" + Namespace + "/auth/cert_qual/login"
+        
+        print("url:", url)
+        print("data:", data)
+        
+        response = requests.post(url, headers=headers, data=data, cert=cert, verify=False)
+        print("response:", response)
+        
+        request = response.json()
+        print("request:", request)
+        
+        Token = request.get("auth").get("client_token")
+        
+        # Sauvegarde le token dans un fichier temporaire
+        expiration_time = time.time() + request.get("auth").get("lease_duration")
+        token_data = {"token": Token, "expiration_time": expiration_time}
+        with open(token_file, "w") as file:
+            json.dump(token_data, file)
+        
+        return Token
+    except Exception as e:
+        print("Une erreur s'est produite lors de la récupération du token:", str(e))
+        return None
+
+
+
+
 import time
 
 def getToken(Auth_name, file_cert, file_key, Namespace, url_vault):
