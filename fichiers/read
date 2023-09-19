@@ -1,3 +1,31 @@
+def fetch_data(tenant=None):
+    try:
+        # Si un tenant est spécifié, renvoyer la liste des groupes de ce tenant
+        if tenant:
+            root_folder = client.get_root_project_folder()
+            folders = root_folder.list_child_folders()
+            logging.info("Dossiers trouvés: %s", [f.name for f in folders])
+            for folder in folders:
+                if folder.name == tenant:
+                    folder_settings = folder.get_settings()
+                    folder_permissions = folder_settings.get_permissions()
+                    groups = [g['group'] for g in folder_permissions]
+                    logging.info("Groupes pour le dossier %s: %s", tenant, groups)
+                    return groups
+            return []
+        # Si aucun tenant n'est spécifié, renvoyer la liste de tous les dossiers (tenants)
+        else:
+            root_folder = client.get_root_project_folder()
+            folders = root_folder.list_child_folders()
+            logging.info("Dossiers trouvés: %s", [f.name for f in folders])
+            return [folder.name for folder in folders]
+    except Exception as e:
+        logging.error("Erreur lors de la récupération des données: %s", str(e))
+        return str(e)
+
+
+
+
 def test_connection():
     try:
         projects = client.list_projects()
