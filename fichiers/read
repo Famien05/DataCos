@@ -1,3 +1,14 @@
+def test_connection():
+    try:
+        projects = client.list_projects()
+        logging.info("Projets trouvés: %s", [p["name"] for p in projects])
+        return [p["name"] for p in projects]
+    except Exception as e:
+        logging.error("Erreur lors de la récupération des projets: %s", str(e))
+        return str(e)
+
+
+
 import dataikuapi
 import logging
 
