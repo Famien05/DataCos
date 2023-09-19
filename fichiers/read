@@ -1,3 +1,48 @@
+import dataikuapi
+import logging
+
+# Configuration de Dataiku
+HOST = "https://s02v19900033.fr.net.intra:10443"
+API_KEY = "hnweqTNWnL1H4r03oygjnesbsmSpxbIN"
+
+client = dataikuapi.DSSClient(HOST, API_KEY)
+client._session.verify = False
+
+# Configuration des logs
+logging.basicConfig(level=logging.INFO)
+
+def fetch_data(tenant=None):
+    logging.info("Fonction fetch_data appelée avec le tenant : %s", tenant)
+    
+    root_folder = client.get_root_project_folder()
+
+    # Si un tenant est spécifié, renvoyer la liste des groupes de ce tenant
+    if tenant:
+        logging.info("Recherche des groupes pour le tenant spécifié : %s", tenant)
+        
+        for folder in root_folder.list_child_folders():
+            if folder.name == tenant:
+                logging.info("Tenant trouvé : %s", tenant)
+                
+                folder_settings = folder.get_settings()
+                folder_permissions = folder_settings.get_permissions()
+                groups = [g['group'] for g in folder_permissions]
+                
+                logging.info("Groupes trouvés pour le tenant %s : %s", tenant, groups)
+                return groups
+                
+        logging.warning("Aucun tenant trouvé avec le nom : %s", tenant)
+        return []
+
+    # Si aucun tenant n'est spécifié, renvoyer la liste de tous les dossiers (tenants)
+    else:
+        tenants = [folder.name for folder in root_folder.list_child_folders()]
+        
+        logging.info("Aucun tenant spécifié. Liste de tous les tenants retournée : %s", tenants)
+        return tenants
+
+
+
 import dataiku
 from dataiku import api_client
 import requests
