@@ -1,3 +1,13 @@
+port dataiku
+from dataiku import api_client
+import requests
+
+# Désactiver la vérification SSL globalement pour les sessions
+requests.packages.urllib3.disable_warnings()
+dataiku.set_http_verify(False)  # Désactiver la vérification SSL pour Dataiku
+
+
+
 import dataiku
 from dataiku import api_client
 
