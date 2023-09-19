@@ -1,3 +1,41 @@
+
+import dataikuapi
+
+# Configuration de Dataiku
+HOST = "https://s02v19900033.fr.net.intra:10443"
+API_KEY = "hnleqTNinL1H4r03oyginesbSmSpXbIN"
+client = dataikuapi.DSSClient(HOST, API_KEY)
+
+# Fonction pour lister les dossiers (tenants)
+def list_folders():
+    root_folder = client.get_root_project_folder()
+    return [folder.name for folder in root_folder.list_child_folders()]
+
+# Fonction pour lister les groupes d'un dossier (tenant) spécifique
+def list_groups_of_folder(tenant_name):
+    root_folder = client.get_root_project_folder()
+    for folder in root_folder.list_child_folders():
+        if folder.name == tenant_name:
+            folder_settings = folder.get_settings()
+            folder_permissions = folder_settings.get_permissions()
+            return [g['group'] for g in folder_permissions]
+    return []
+
+# Fonction principale
+def do(tenant=None):
+    # Appeler la bonne fonction en fonction de la présence ou non du paramètre 'tenant'
+    if tenant:
+        return list_groups_of_folder(tenant)
+    else:
+        return list_folders()
+
+# Testez les fonctions
+if __name__ == "__main__":
+    print(do())  # Afficher tous les dossiers (tenants)
+    print(do("tenant_name_exemple"))  # Remplacez "tenant_name_exemple" par le nom réel d'un tenant pour lister ses groupes
+
+
+
 import dataiku
 from dataiku import api_client
 
