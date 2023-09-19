@@ -1,3 +1,36 @@
+import dataiku
+from dataiku import api_client
+
+client = api_client()
+
+def do(tenant=None):
+    # Fonction pour lister les dossiers
+    def list_folders():
+        root_folder = client.get_root_project_folder()
+        return [folder.name for folder in root_folder.list_child_folders()]
+
+    # Fonction pour lister les groupes d'un dossier spécifique
+    def list_groups_of_folder(tenant_name):
+        root_folder = client.get_root_project_folder()
+        for folder in root_folder.list_child_folders():
+            if folder.name == tenant_name:
+                folder_settings = folder.get_settings()
+                folder_permissions = folder_settings.get_permissions()
+                return [g['group'] for g in folder_permissions]
+        return []
+
+    # Appeler la bonne fonction en fonction de la présence ou non du paramètre 'tenant'
+    if tenant:
+        return list_groups_of_folder(tenant)
+    else:
+        return list_folders()
+
+
+
+
+
+
+
 import os
 import json
 import time
