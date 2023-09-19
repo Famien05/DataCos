@@ -1,3 +1,54 @@
+import dataiku
+from dataiku import api_client
+
+def fetch_data(tenant=None):
+    client = api_client()
+    
+    # Si un tenant est spécifié, renvoyer la liste des groupes de ce tenant
+    if tenant:
+        root_folder = client.get_root_project_folder()
+        for folder in root_folder.list_child_folders():
+            if folder.name == tenant:
+                folder_settings = folder.get_settings()
+                folder_permissions = folder_settings.get_permissions()
+                return [g['group'] for g in folder_permissions]
+        return []
+    
+    # Si aucun tenant n'est spécifié, renvoyer la liste de tous les dossiers (tenants)
+    else:
+        root_folder = client.get_root_project_folder()
+        return [folder.name for folder in root_folder.list_child_folders()]
+
+
+
+
+import dataikuapi
+
+# Configuration de Dataiku
+HOST = "https://s02v19900033.fr.net.intra:10443"
+API_KEY = "hnleqTNinL1H4r03oyginesbSmSpXbIN"
+client = dataikuapi.DSSClient(HOST, API_KEY)
+
+def fetch_data(tenant=None):
+    # Si un tenant est spécifié, renvoyer la liste des groupes de ce tenant
+    if tenant:
+        root_folder = client.get_root_project_folder()
+        for folder in root_folder.list_child_folders():
+            if folder.name == tenant:
+                folder_settings = folder.get_settings()
+                folder_permissions = folder_settings.get_permissions()
+                return [g['group'] for g in folder_permissions]
+        return []
+    
+    # Si aucun tenant n'est spécifié, renvoyer la liste de tous les dossiers (tenants)
+    else:
+        root_folder = client.get_root_project_folder()
+        return [folder.name for folder in root_folder.list_child_folders()]
+
+
+
+
+
 
 import dataikuapi
 
