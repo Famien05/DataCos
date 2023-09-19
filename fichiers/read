@@ -1,3 +1,31 @@
+import dataiku
+from dataiku import api_client
+import requests
+
+# Désactiver la vérification SSL globalement pour les sessions
+requests.packages.urllib3.disable_warnings()
+dataiku.set_http_verify(False)  # Désactiver la vérification SSL pour Dataiku
+
+def fetch_data(tenant=None):
+    client = api_client()
+    
+    # Si un tenant est spécifié, renvoyer la liste des groupes de ce tenant
+    if tenant:
+        root_folder = client.get_root_project_folder()
+        for folder in root_folder.list_child_folders():
+            if folder.name == tenant:
+                folder_settings = folder.get_settings()
+                folder_permissions = folder_settings.get_permissions()
+                return [g['group'] for g in folder_permissions]
+        return []
+    
+    # Si aucun tenant n'est spécifié, renvoyer la liste de tous les dossiers (tenants)
+    else:
+        root_folder = client.get_root_project_folder()
+        return [folder.name for folder in root_folder.list_child_folders()]
+
+
+
 port dataiku
 from dataiku import api_client
 import requests
