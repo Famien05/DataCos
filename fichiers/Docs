@@ -1,3 +1,48 @@
+Bien sûr, je peux vous aider à démarrer chaque section. Voici un exemple de rédaction pour les premières sections :
+
+---
+
+### 1. Introduction
+Ce guide a pour objectif de guider les utilisateurs de Dataiku dans la création, le test et le déploiement d’API via l’API Designer de Dataiku. Il est destiné aux utilisateurs ayant déjà un projet Dataiku en place et cherchant à créer des API pour exposer leurs modèles, données ou logiques métier.
+
+**Prérequis :** Un projet Dataiku existant.
+
+### 2. Accès et Configuration de l’API Designer
+Pour commencer, accédez à votre projet sur Dataiku et naviguez vers l’API Designer.
+
+**a.** Dans votre projet, sélectionnez l’option **API Designer** depuis le menu latéral.
+**b.** Une fois dans l’API Designer, choisissez l’option pour créer un nouvel endpoint.
+
+_[Insérez une capture d'écran de l'interface de création d'endpoint ici.]_
+
+### 3. Rédaction du Code pour l’Endpoint
+Dans l’API Designer, vous aurez accès à un environnement de développement où vous pourrez écrire le code pour votre endpoint.
+
+**a. Contexte d’Exécution :** Le code est exécuté dans l’environnement de votre instance Dataiku, donc assurez-vous d’avoir les bonnes permissions et configurations.
+**b. Développement du Code :** Rédigez votre code en Python en suivant les bonnes pratiques et en utilisant les bibliothèques adéquates.
+
+_[Insérez des captures d'écran de la fenêtre de code ici, montrant un exemple de code d'endpoint.]_
+
+### 4. Test de l’Endpoint
+Dataiku fournit des outils de test intégrés qui vous permettent de vérifier la fonctionnalité de votre endpoint avant le déploiement.
+
+**a. Utilisation des Outils de Test :** Utilisez les options de test fournies pour envoyer des requêtes à votre endpoint et voir les réponses.
+**b. Interprétation des Résultats :** Apprenez à interpréter les résultats de vos tests pour assurer la correcte fonctionnalité de votre API.
+
+_[Insérez des captures d'écran montrant le processus de test et les résultats ici.]_
+
+Vous pouvez continuer à développer chaque section de la même manière, en expliquant chaque étape clairement et en ajoutant des captures d'écran pertinentes pour illustrer les points principaux. N’oubliez pas d’ajouter les détails spécifiques à chaque étape en fonction de votre expérience et de vos connaissances de l’outil.
+
+
+
+
+
+
+
+
+
+
+
 Bien sûr ! Vous pouvez débuter votre document en supposant que le lecteur a déjà un projet en place. Voici un plan plus précis, basé sur vos besoins :
 
 ### 1. Introduction
