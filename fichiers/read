@@ -1,3 +1,21 @@
+def insertion_user(users):
+    ...
+    for user in users:
+        ...
+        # Pour un seul utilisateur, lever une exception en cas d'erreur
+        if len(users) == 1:
+            if i_UID in current_data['i_UID'].values:
+                raise ValueError("🚫 L'ID utilisateur '{}' existe déjà.".format(i_UID))
+            if profil not in ["Reader", "Designer"]:
+                raise ValueError("🚫 Profil '{}' non valide.".format(profil))
+            if not isinstance(admin, bool):
+                raise ValueError("🚫 Valeur admin invalide.")
+        else: # Pour plusieurs utilisateurs, ajouter des erreurs à la liste des résultats
+            if i_UID in current_data['i_UID'].values:
+                results.append({"i_UID": i_UID, "status": "error", "message": "🚫 L'ID utilisateur '{}' existe déjà⬤
+
+
+
 def fetch_data(tenant=None):
     try:
         # Si un tenant est spécifié, renvoyer la liste des groupes de ce tenant
